@@ -45,7 +45,8 @@
             // mapbox://styles/mapbox/navigation-guidance-day-v2
             // mapbox://styles/mapbox/navigation-guidance-night-v2
             // 由 Mapbox 托管的切片集合可进行样式优化，只需将 ?optimize=true 添加到样式 URL 的末尾即可，例如 mapbox://styles/mapbox/streets-v9?optimize=true。 更多关于矢量切片样式优化的内容，请查阅API 文档.
-            interactive:false,//如果为 false ，地图将不会绑定对鼠标、触碰、键盘的监听，因此地图将不会响应任何用户交互。
+            // interactive:false,//如果为 false ，地图将不会绑定对鼠标、触碰、键盘的监听，因此地图将不会响应任何用户交互。
+            minZoom:5,//地图最小/大maxZoom缩放级别（0-24）。
             style: {
                 "version": 8,
                 "sources": {
