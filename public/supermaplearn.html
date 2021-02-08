@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="dist/js/include-web.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.40.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.40.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.4/mapbox-gl-draw.js"></script>
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <!-- 可选的Bootstrap主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/mapbox-gl/1.12.1/mapbox-gl.css" rel="stylesheet" />
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/mapbox-gl/1.12.1/iclient-mapboxgl.min.css" rel="stylesheet" />
+            <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.1/mapbox-gl.css"/>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/mapbox-gl/1.12.1/iclient-mapboxgl.min.css" rel="stylesheet" /> 
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mapbox-gl/1.12.1/mapbox-gl.js"></script>
+            <script type="text/javascript" src="https://iclient.supermap.io/dist/mapboxgl/iclient-mapboxgl.js"></script> -->
+</head>
+
+<body>
+    <!-- // 地图显示的div -->
+    <div id="map" style="position:absolute;left:0px;right:0px;width:800px;height:500px;"></div>
+    <script type="text/javascript">
+        var host = window.isLocal ? window.server : "https://iserver.supermap.io";
+        var attribution = "<a href='https://www.mapbox.com/about/maps/' target='_blank'>© Mapbox </a>" +
+            "with <span>© <a href='https://iclient.supermap.io' target='_blank'>SuperMap iClient</a> | </span>" +
+            " Map Data <span>© <a href='http://support.supermap.com.cn/product/iServer.aspx' target='_blank'>SuperMap iServer</a></span> ";
+
+        var map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: {
+                "version": 8,
+                "sources": {
+                    "raster-tiles": {
+                        "attribution": attribution,
+                        "type": "raster",
+                        "tiles": [host + '/iserver/services/map-china400/rest/maps/China/zxyTileImage.png?z={z}&x={x}&y={y}'],
+                        "tileSize": 256
+                    }
+                },
+                "layers": [{
+                    "id": "simple-tiles",
+                    "type": "raster",
+                    "source": "raster-tiles",
+                    "minzoom": 0,
+                    "maxzoom": 22
+                }]
+            },
+            center: [120.143, 30.236], // starting position
+            zoom: 3, // starting zoom
+            // 适量瓦片，类似图层（将矢量数据通过不同的描述文件来组织和定义，在客户端实时解析数据并完成绘制。）
+            // style: 'https://iserver.supermap.io/iserver/services/map-mvt-China/rest/maps/China/tileFeature/vectorstyles.json?type=MapBox_GL&styleonly=true',
+            // attributionControl: false
+        });
+        // --------添加控件-----------
+        map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+        // map.addControl(new mapboxgl.supermap.LogoControl(), 'bottom-right');
+        map.addControl(new mapboxgl.ScaleControl({}));
+        // 基本绘制 绘制要素图形控件（需要添加mapbox-gl-draw.js）
+        var Draw = new MapboxDraw({
+            // 可选组件
+            displayControlsDefault: false,
+            controls: {
+                // line_string: true,
+                // trash: true,
+                polygon: true,
+                trash: true
+            }
+        });
+        map.addControl(Draw, 'top-left');
+
+
+        // 面积和距离量算
+        function measureDistance(e) {
+            if (!e.features) {
+                widgets.alert.showAlert(resources.msg_noDataRedraw, false);
+            }
+            var param = new SuperMap.MeasureParameters(e.features[0]);
+            new mapboxgl.supermap.MeasureService(url).measureDistance(param, function (serviceResult) {
+                var distance = serviceResult.result.distance;
+                widgets.alert.showAlert(distance + resources.msg_m, true);
+            });
+        }
+
+        function measureArea(e) {
+            if (!e.features) {
+                widgets.alert.showAlert(resources.msg_noDataRedraw, false);
+            }
+            var param = new SuperMap.MeasureParameters(e.features[0]);
+            new mapboxgl.supermap.MeasureService(url).measureArea(param, function (serviceResult) {
+                var area = serviceResult.result.area;
+                var rounded_area = Math.round(area * 100) / 100;
+                widgets.alert.showAlert(rounded_area + resources.msg_sqm, true);
+            });
+        }
+
+
+        function removeMsg() {
+            alert("wwwwww");
+            $('#msg_container').remove();
+        }
+        // map.on('Draw.create', measureDistance);
+        map.on('Draw.create', measureArea);
+        map.on('Draw.delete', removeMsg);
+
+    </script>
+</body>
+
+</html>
